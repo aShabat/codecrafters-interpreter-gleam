@@ -1,24 +1,36 @@
 import lox
+import lox_logger
 
 import argv
 import simplifile
 
-pub fn main() {
+pub fn main() -> Nil {
   let args = argv.load().arguments
 
   let interpreter = lox.new()
 
   case args {
     ["tokenize", filename] -> {
-      case simplifile.read(filename) {
-        Error(error) ->
-          interpreter |> lox.warn(error |> simplifile.describe_error)
-        Ok(file_contents) -> interpreter |> lox.tokenize(file_contents)
+      let interpreter = case simplifile.read(filename) {
+        Error(error) -> {
+          interpreter
+          |> lox.logger
+          |> lox_logger.print_error(
+            "Error: couldn't access file: " <> simplifile.describe_error(error),
+          )
+          interpreter
+        }
+        Ok(file_contents) -> {
+          interpreter |> lox.tokenize(file_contents)
+        }
       }
+      interpreter |> lox.logger |> lox_logger.exit_code |> exit
     }
     _ -> {
-      lox.warn(interpreter, "Usage: ./your_program.sh tokenize <filename>")
-      exit(1)
+      interpreter
+      |> lox.logger
+      |> lox_logger.print_error("Usage: ./your_program.sh tokenize <filename>")
+      interpreter |> lox.logger |> lox_logger.exit_code |> exit
     }
   }
 }

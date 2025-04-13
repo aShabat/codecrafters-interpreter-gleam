@@ -4,41 +4,45 @@ import lox_logger.{type Logger}
 import token.{type Token, Token}
 
 pub opaque type Scanner {
-  Scanner(logger: Logger)
+  Scanner(
+    logger: Logger,
+    contents: String,
+    mode: Mode,
+    line: Int,
+    tokens: List(Token),
+  )
 }
 
-pub fn new(logger: Logger) {
-  Scanner(logger:)
+pub fn new(logger: Logger, contents: String) {
+  Scanner(logger:, contents:, mode: Empty, line: 1, tokens: [])
 }
 
-pub fn scan_tokens(scanner: Scanner, file_contents: String) -> List(Token) {
-  scan_tokens_helper(scanner, file_contents, State(Empty, 1), [])
-  |> list.reverse
+pub fn tokens(scanner: Scanner) -> List(Token) {
+  scanner.tokens |> list.reverse
 }
 
-fn scan_tokens_helper(
-  scanner: Scanner,
-  contents: String,
-  state: State,
-  tokens: List(Token),
-) -> List(Token) {
-  echo contents
-  case string.pop_grapheme(contents) {
-    Error(_) -> [token.Token(token.Eof, state.line, ""), ..tokens]
-    Ok(#(grapheme, contents)) -> {
-      let #(new_tokens, state) = consume_grapheme(scanner, state, grapheme)
-      scan_tokens_helper(
-        scanner,
-        contents,
-        state,
-        put_front(new_tokens, tokens),
-      )
-    }
+pub fn scan(scanner: Scanner) -> Scanner {
+  case scanner.mode {
+    Done -> scanner
+    _ -> scanner |> scan_step |> scan
+  }
+}
+
+fn scan_step(scanner: Scanner) -> Scanner {
+  case string.pop_grapheme(scanner.contents) {
+    Error(_) ->
+      Scanner(..scanner, mode: Done, tokens: [
+        Token(token.Eof, scanner.line, ""),
+        ..scanner.tokens
+      ])
+    Ok(#(grapheme, contents)) ->
+      Scanner(..scanner, contents:) |> consume_grapheme(grapheme)
   }
 }
 
 type Mode {
   Empty
+  Done
 
   Bang
   Equal
@@ -46,46 +50,80 @@ type Mode {
   Less
 }
 
-type State {
-  State(mode: Mode, line: Int)
-}
-
-fn consume_grapheme(
-  scanner: Scanner,
-  state: State,
-  grapheme: String,
-) -> #(List(Token), State) {
-  case state {
-    State(Empty, line) ->
+fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
+  case scanner.mode {
+    Empty ->
       case grapheme {
-        "\t" | "\r" -> #([], state)
-        "\n" -> #([], State(..state, line: line + 1))
+        "\t" | "\r" -> scanner
+        "\n" -> Scanner(..scanner, line: scanner.line + 1)
 
-        "(" -> #([Token(token.LeftParen, line, "(")], state)
-        ")" -> #([Token(token.RightParen, line, ")")], state)
-        "{" -> #([Token(token.LeftBrace, line, "{")], state)
-        "}" -> #([Token(token.RightBrace, line, "}")], state)
-        "." -> #([Token(token.Dot, line, ".")], state)
-        "," -> #([Token(token.Comma, line, ",")], state)
-        ";" -> #([Token(token.Semicolon, line, ";")], state)
-        "*" -> #([Token(token.Star, line, "*")], state)
-        "+" -> #([Token(token.Plus, line, "+")], state)
-        "-" -> #([Token(token.Minus, line, "-")], state)
+        "(" ->
+          Scanner(..scanner, tokens: [
+            Token(token.LeftParen, scanner.line, "("),
+            ..scanner.tokens
+          ])
+        ")" ->
+          Scanner(..scanner, tokens: [
+            Token(token.RightParen, scanner.line, ")"),
+            ..scanner.tokens
+          ])
+        "{" ->
+          Scanner(..scanner, tokens: [
+            Token(token.LeftBrace, scanner.line, "{"),
+            ..scanner.tokens
+          ])
+        "}" ->
+          Scanner(..scanner, tokens: [
+            Token(token.RightBrace, scanner.line, "}"),
+            ..scanner.tokens
+          ])
+        "." ->
+          Scanner(..scanner, tokens: [
+            Token(token.Dot, scanner.line, "."),
+            ..scanner.tokens
+          ])
+        "," ->
+          Scanner(..scanner, tokens: [
+            Token(token.Comma, scanner.line, ","),
+            ..scanner.tokens
+          ])
+        ";" ->
+          Scanner(..scanner, tokens: [
+            Token(token.Semicolon, scanner.line, ";"),
+            ..scanner.tokens
+          ])
+        "*" ->
+          Scanner(..scanner, tokens: [
+            Token(token.Star, scanner.line, "*"),
+            ..scanner.tokens
+          ])
+        "+" ->
+          Scanner(..scanner, tokens: [
+            Token(token.Plus, scanner.line, "+"),
+            ..scanner.tokens
+          ])
+        "-" ->
+          Scanner(..scanner, tokens: [
+            Token(token.Minus, scanner.line, "-"),
+            ..scanner.tokens
+          ])
 
-        "!" -> #([], State(..state, mode: Bang))
-        "=" -> #([], State(..state, mode: Equal))
-        ">" -> #([], State(..state, mode: Greater))
-        "<" -> #([], State(..state, mode: Less))
+        "!" -> Scanner(..scanner, mode: Bang)
+        "=" -> Scanner(..scanner, mode: Equal)
+        ">" -> Scanner(..scanner, mode: Greater)
+        "<" -> Scanner(..scanner, mode: Less)
         _ -> {
-          scanner.logger
-          |> lox_logger.error(state.line, "", "Unexpected symbol.")
-          #([], State(..state, mode: Empty))
+          let logger =
+            scanner.logger
+            |> lox_logger.syntax_error(scanner.line, "Unexpected symbol.")
+          Scanner(..scanner, logger:)
         }
       }
     _ -> {
-      scanner.logger
-      |> lox_logger.error(state.line, "", "Unexpected symbol.")
-      #([], State(..state, mode: Empty))
+      let logger =
+        scanner.logger
+        |> lox_logger.syntax_error(scanner.line, "Unexpected symbol.")
+      Scanner(..scanner, logger:)
     }
   }
 }
@@ -95,4 +133,8 @@ fn put_front(left: List(value), right: List(value)) -> List(value) {
     [] -> right
     [head, ..tail] -> put_front(tail, [head, ..right])
   }
+}
+
+pub fn logger(scanner: Scanner) -> Logger {
+  scanner.logger
 }
