@@ -99,5 +99,5 @@ pub fn info(token: Token) -> String {
     _ -> "null"
   }
 
-  name <> " " <> token.lexemme <> "" <> value
+  name <> " " <> token.lexemme <> " " <> value
 }
