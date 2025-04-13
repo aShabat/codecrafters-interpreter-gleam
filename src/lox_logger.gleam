@@ -34,7 +34,7 @@ pub fn error(
 ) -> Logger {
   logger
   |> print_error(
-    "[line" <> int.to_string(line) <> "] Error" <> where <> ": " <> message,
+    "[line " <> int.to_string(line) <> "] Error" <> where <> ": " <> message,
   )
 }
 

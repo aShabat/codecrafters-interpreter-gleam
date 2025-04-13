@@ -115,7 +115,10 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
         _ -> {
           let logger =
             scanner.logger
-            |> lox_logger.syntax_error(scanner.line, "Unexpected symbol.")
+            |> lox_logger.syntax_error(
+              scanner.line,
+              "Unexpected character: " <> grapheme,
+            )
           Scanner(..scanner, logger:)
         }
       }
