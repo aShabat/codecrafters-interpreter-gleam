@@ -51,62 +51,49 @@ type Mode {
 }
 
 fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
-  case scanner.mode {
+  let Scanner(line:, mode:, tokens:, ..) = scanner
+
+  case mode {
     Empty ->
       case grapheme {
         "\t" | "\r" -> scanner
-        "\n" -> Scanner(..scanner, line: scanner.line + 1)
+        "\n" -> Scanner(..scanner, line: line + 1)
 
         "(" ->
           Scanner(..scanner, tokens: [
-            Token(token.LeftParen, scanner.line, "("),
-            ..scanner.tokens
+            Token(token.LeftParen, line, "("),
+            ..tokens
           ])
         ")" ->
           Scanner(..scanner, tokens: [
-            Token(token.RightParen, scanner.line, ")"),
-            ..scanner.tokens
+            Token(token.RightParen, line, ")"),
+            ..tokens
           ])
         "{" ->
           Scanner(..scanner, tokens: [
-            Token(token.LeftBrace, scanner.line, "{"),
-            ..scanner.tokens
+            Token(token.LeftBrace, line, "{"),
+            ..tokens
           ])
         "}" ->
           Scanner(..scanner, tokens: [
-            Token(token.RightBrace, scanner.line, "}"),
-            ..scanner.tokens
+            Token(token.RightBrace, line, "}"),
+            ..tokens
           ])
         "." ->
-          Scanner(..scanner, tokens: [
-            Token(token.Dot, scanner.line, "."),
-            ..scanner.tokens
-          ])
+          Scanner(..scanner, tokens: [Token(token.Dot, line, "."), ..tokens])
         "," ->
-          Scanner(..scanner, tokens: [
-            Token(token.Comma, scanner.line, ","),
-            ..scanner.tokens
-          ])
+          Scanner(..scanner, tokens: [Token(token.Comma, line, ","), ..tokens])
         ";" ->
           Scanner(..scanner, tokens: [
-            Token(token.Semicolon, scanner.line, ";"),
-            ..scanner.tokens
+            Token(token.Semicolon, line, ";"),
+            ..tokens
           ])
         "*" ->
-          Scanner(..scanner, tokens: [
-            Token(token.Star, scanner.line, "*"),
-            ..scanner.tokens
-          ])
+          Scanner(..scanner, tokens: [Token(token.Star, line, "*"), ..tokens])
         "+" ->
-          Scanner(..scanner, tokens: [
-            Token(token.Plus, scanner.line, "+"),
-            ..scanner.tokens
-          ])
+          Scanner(..scanner, tokens: [Token(token.Plus, line, "+"), ..tokens])
         "-" ->
-          Scanner(..scanner, tokens: [
-            Token(token.Minus, scanner.line, "-"),
-            ..scanner.tokens
-          ])
+          Scanner(..scanner, tokens: [Token(token.Minus, line, "-"), ..tokens])
 
         "!" -> Scanner(..scanner, mode: Bang)
         "=" -> Scanner(..scanner, mode: Equal)
@@ -116,16 +103,72 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
           let logger =
             scanner.logger
             |> lox_logger.syntax_error(
-              scanner.line,
+              line,
               "Unexpected character: " <> grapheme,
             )
           Scanner(..scanner, logger:)
         }
       }
+    Bang ->
+      case grapheme {
+        "=" ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.BangEqual, line, "!="),
+            ..tokens
+          ])
+        _ ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.Bang, line, "!"),
+            ..tokens
+          ])
+          |> consume_grapheme(grapheme)
+      }
+    Equal ->
+      case grapheme {
+        "=" ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.EqualEqual, line, "=="),
+            ..tokens
+          ])
+        _ ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.Equal, line, "="),
+            ..tokens
+          ])
+          |> consume_grapheme(grapheme)
+      }
+    Greater ->
+      case grapheme {
+        "=" ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.GreaterEqual, line, ">="),
+            ..tokens
+          ])
+        _ ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.Greater, line, ">"),
+            ..tokens
+          ])
+          |> consume_grapheme(grapheme)
+      }
+    Less ->
+      case grapheme {
+        "=" ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.LessEqual, line, "<="),
+            ..tokens
+          ])
+        _ ->
+          Scanner(..scanner, mode: Empty, tokens: [
+            Token(token.Less, line, "<"),
+            ..tokens
+          ])
+          |> consume_grapheme(grapheme)
+      }
     _ -> {
       let logger =
         scanner.logger
-        |> lox_logger.syntax_error(scanner.line, "Unexpected symbol.")
+        |> lox_logger.syntax_error(line, "Unexpected symbol.")
       Scanner(..scanner, logger:)
     }
   }
