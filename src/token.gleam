@@ -27,23 +27,23 @@ pub type TokenValue {
   LessEqual
 
   Identifier(name: String)
-  String(value: String)
-  Number(value: Float)
+  LoxString(value: String)
+  LoxNumber(value: Float)
 
   And
   Class
   Else
-  False
+  LoxFalse
   Fun
   For
   If
-  Nil
+  LoxNil
   Or
   Print
   Return
   Super
   This
-  True
+  LoxTrue
   Var
   While
 
@@ -72,30 +72,30 @@ pub fn info(token: Token) -> String {
     Less -> "LESS"
     LessEqual -> "LESS_EQUAL"
     Identifier(_) -> "IDENTIFIER"
-    String(_) -> "STRING"
-    Number(_) -> "NUMBER"
+    LoxString(_) -> "STRING"
+    LoxNumber(_) -> "NUMBER"
     And -> "AND"
     Class -> "CLASS"
     Else -> "ELSE"
-    False -> "FALSE"
+    LoxFalse -> "FALSE"
     Fun -> "FUN"
     For -> "FOR"
     If -> "IF"
-    Nil -> "NIL"
+    LoxNil -> "NIL"
     Or -> "OR"
     Print -> "PRINT"
     Return -> "RETURN"
     Super -> "SUPER"
     This -> "THIS"
-    True -> "TRUE"
+    LoxTrue -> "TRUE"
     Var -> "VAR"
     While -> "WHILE"
     Eof -> "EOF"
   }
 
   let value = case token.value {
-    String(value) -> value
-    Number(value) -> float.to_string(value)
+    LoxString(value) -> value
+    LoxNumber(value) -> float.to_string(value)
     _ -> "null"
   }
 
