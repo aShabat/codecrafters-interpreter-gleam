@@ -12,7 +12,7 @@ pub fn new() -> Logger {
 pub fn exit_code(logger: Logger) -> Int {
   case logger.syntax_error {
     True -> 65
-    False -> 1
+    False -> 0
   }
 }
 
