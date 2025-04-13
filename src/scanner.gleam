@@ -56,7 +56,7 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
   case mode {
     Empty ->
       case grapheme {
-        "\t" | "\r" -> scanner
+        " " | "\t" | "\r" -> scanner
         "\n" -> Scanner(..scanner, line: line + 1)
 
         "(" ->
