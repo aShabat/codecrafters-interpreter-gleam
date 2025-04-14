@@ -1,14 +1,14 @@
 import gleam/list
-import lox_logger.{type Logger}
-import scanner
-import token
+import lox/logger.{type Logger}
+import lox/scanner
+import lox/token
 
 pub opaque type Lox {
   Lox(logger: Logger)
 }
 
 pub fn new() -> Lox {
-  let logger = lox_logger.new()
+  let logger = logger.new()
   Lox(logger:)
 }
 
@@ -18,7 +18,7 @@ pub fn tokenize(lox: Lox, file_contents: String) -> Lox {
   let tokens = scanner |> scanner.tokens()
   {
     use token <- list.map(tokens)
-    token |> token.info |> lox_logger.print(lox.logger, _)
+    token |> token.info |> logger.print(lox.logger, _)
   }
 
   Lox(logger:)

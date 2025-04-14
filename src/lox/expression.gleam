@@ -1,4 +1,5 @@
-import token.{type Token}
+import gleam/float
+import lox/token.{type Token}
 
 pub type Expr {
   Literal(token: Token)
@@ -9,7 +10,12 @@ pub type Expr {
 
 pub fn info(expression: Expr) -> String {
   case expression {
-    Literal(token) -> token.lexemme
+    Literal(token) ->
+      case token.value {
+        token.LoxString(string) -> string
+        token.LoxNumber(number) -> float.to_string(number)
+        _ -> token.lexemme
+      }
     Unary(operator, right) ->
       "(" <> operator.lexemme <> " " <> info(right) <> ")"
     Binary(operator, left, right) ->

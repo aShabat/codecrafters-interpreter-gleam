@@ -1,5 +1,5 @@
 import lox
-import lox_logger
+import lox/logger
 
 import argv
 import simplifile
@@ -15,7 +15,7 @@ pub fn main() -> Nil {
         Error(error) -> {
           interpreter
           |> lox.logger
-          |> lox_logger.print_error(
+          |> logger.print_error(
             "Error: couldn't access file: " <> simplifile.describe_error(error),
           )
           interpreter
@@ -24,13 +24,13 @@ pub fn main() -> Nil {
           interpreter |> lox.tokenize(file_contents)
         }
       }
-      interpreter |> lox.logger |> lox_logger.exit_code |> exit
+      interpreter |> lox.logger |> logger.exit_code |> exit
     }
     _ -> {
       interpreter
       |> lox.logger
-      |> lox_logger.print_error("Usage: ./your_program.sh tokenize <filename>")
-      interpreter |> lox.logger |> lox_logger.exit_code |> exit
+      |> logger.print_error("Usage: ./your_program.sh tokenize <filename>")
+      interpreter |> lox.logger |> logger.exit_code |> exit
     }
   }
 }

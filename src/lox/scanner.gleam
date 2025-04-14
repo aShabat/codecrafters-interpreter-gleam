@@ -1,8 +1,8 @@
 import gleam/float
 import gleam/list
 import gleam/string
-import lox_logger.{type Logger}
-import token.{type Token, Token}
+import lox/logger.{type Logger}
+import lox/token.{type Token, Token}
 
 pub opaque type Scanner {
   Scanner(
@@ -117,7 +117,7 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
             _, _ -> {
               let logger =
                 scanner.logger
-                |> lox_logger.syntax_error(
+                |> logger.syntax_error(
                   line,
                   "Unexpected character: " <> grapheme,
                 )
@@ -207,7 +207,7 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
         "" -> {
           let logger =
             scanner.logger
-            |> lox_logger.syntax_error(line, "Unterminated string.")
+            |> logger.syntax_error(line, "Unterminated string.")
           Scanner(..scanner, logger:)
         }
         _ -> Scanner(..scanner, mode: LoxString(string <> grapheme))
@@ -260,7 +260,7 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
     _ -> {
       let logger =
         scanner.logger
-        |> lox_logger.syntax_error(line, "Unexpected symbol.")
+        |> logger.syntax_error(line, "Unexpected symbol.")
       Scanner(..scanner, logger:)
     }
   }
