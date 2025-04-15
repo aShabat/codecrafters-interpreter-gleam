@@ -266,13 +266,6 @@ fn consume_grapheme(scanner: Scanner, grapheme: String) -> Scanner {
   }
 }
 
-fn put_front(left: List(value), right: List(value)) -> List(value) {
-  case left {
-    [] -> right
-    [head, ..tail] -> put_front(tail, [head, ..right])
-  }
-}
-
 pub fn logger(scanner: Scanner) -> Logger {
   scanner.logger
 }

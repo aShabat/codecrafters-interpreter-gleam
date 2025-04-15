@@ -45,6 +45,6 @@ pub fn logger(lox: Lox) -> Logger {
   lox.logger
 }
 
-pub fn update_logger(lox: Lox, logger: Logger) -> Lox {
+pub fn update_logger(_lox: Lox, logger: Logger) -> Lox {
   Lox(logger:)
 }
