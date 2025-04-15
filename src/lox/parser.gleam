@@ -158,11 +158,6 @@ fn primary(parser: Parser) -> Result(#(Parser, Expr), Parser) {
 //   }
 // }
 
-fn first_token(parser: Parser) -> token.Token {
-  let assert [first, ..] = parser.tokens
-  first
-}
-
 pub fn logger(parser: Parser) -> Logger {
   parser.logger
 }
