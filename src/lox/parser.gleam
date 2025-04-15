@@ -137,26 +137,26 @@ fn primary(parser: Parser) -> Result(#(Parser, Expr), Parser) {
   }
 }
 
-fn synchronize(parser: Parser) -> Parser {
-  case first_token(parser).value {
-    token.Eof
-    | token.Class
-    | token.Fun
-    | token.Var
-    | token.For
-    | token.If
-    | token.While
-    | token.Print
-    | token.Return -> parser
-    _ -> {
-      let assert [first, ..tokens] = parser.tokens
-      case first.value == token.Semicolon {
-        True -> Parser(..parser, tokens:)
-        False -> Parser(..parser, tokens:) |> synchronize
-      }
-    }
-  }
-}
+// fn synchronize(parser: Parser) -> Parser {
+//   case first_token(parser).value {
+//     token.Eof
+//     | token.Class
+//     | token.Fun
+//     | token.Var
+//     | token.For
+//     | token.If
+//     | token.While
+//     | token.Print
+//     | token.Return -> parser
+//     _ -> {
+//       let assert [first, ..tokens] = parser.tokens
+//       case first.value == token.Semicolon {
+//         True -> Parser(..parser, tokens:)
+//         False -> Parser(..parser, tokens:) |> synchronize
+//       }
+//     }
+//   }
+// }
 
 fn first_token(parser: Parser) -> token.Token {
   let assert [first, ..] = parser.tokens
